@@ -3,9 +3,9 @@ import torch.nn as nn
 from transformers import AutoModel
 
 
-class PerformancePrediction (nn.Module):
+class PerformancepredictionModel (nn.Module):
     def __init__(self, freeze_bert: bool = False):
-        super(PerformancePrediction, self).__init__()
+        super(PerformancepredictionModel, self).__init__()
         self.bert = AutoModel.from_pretrained("distilbert-base-uncased")
         self.linear_layers = nn.ModuleList(
             [nn.Linear(self.bert.config.hidden_size, 1)])

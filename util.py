@@ -4,15 +4,41 @@ import torch
 from torch.utils.data import Dataset as TorchDataset, DataLoader
 from transformers import AutoTokenizer
 
+from model import PerformancepredictionModel
+
+
+def model_accuracy(model: PerformancepredictionModel, dataloader: DataLoader, device):
+    """Compute the accuracy of a binary classification model
+
+    Args:
+        model (PerformancePredictionModel): a hate speech classification model
+        dataloader (DataLoader): a pytorch data loader to test the model with
+        device (string): cpu or cuda, the device that the model is on
+
+    Returns:
+        float: the accuracy of the model
+    """
+    with torch.no_grad():
+        correct = 0
+        total = 0
+        for batch in dataloader:
+            pred = model(batch["input_ids"].to(device),
+                         batch["attention_mask"].to(device))
+            correct += (batch["labels"] ==
+                        (pred.to("cpu").squeeze() > 0.5).to(int)).sum().item()
+            total += batch["labels"].shape[0]
+        acc = correct / total
+        return acc
+
 
 class CustomDataset(TorchDataset):
-    def __init__(self, features, labels):
-        self.features = features
+    def __init__(self, encodings, labels):
+        self.encodings = encodings
         self.labels = labels
 
     def __getitem__(self, idx):
         item = {key: torch.tensor(val[idx])
-                for key, val in self.features.items()}
+                for key, val in self.encodings.items()}
         item['labels'] = torch.tensor(self.labels[idx])
         return item
 
@@ -45,11 +71,15 @@ def get_dataloader(batch_size: int = 4):
     x = df[features].values
     y = df[target].values
 
-    # Convert to dictionary of lists for custom dataset
-    features_dict = {f: x[:, i].tolist() for i, f in enumerate(features)}
+    # initialize tokenizer
+    tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased")
+
+    # Tokenize features
+    encodings = tokenizer([str(f) for f in x],
+                          truncation=True, padding=True, max_length=512)
 
     # Create custom dataset
-    custom_dataset = CustomDataset(features_dict, y)
+    custom_dataset = CustomDataset(encodings, y)
 
     # Create DataLoader
     dataloader = DataLoader(
