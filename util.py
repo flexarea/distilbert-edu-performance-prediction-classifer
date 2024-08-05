@@ -46,7 +46,7 @@ class CustomDataset(TorchDataset):
         return len(self.labels)
 
 
-def get_dataloader(batch_size: int = 4):
+def get_dataloader(split: str, batch_size: int = 4):
     """
     Get a PyTorch DataLoader for the student performance dataset.
 
@@ -89,7 +89,9 @@ def get_dataloader(batch_size: int = 4):
 
 
 # Example usage
-dataloader = get_dataloader(batch_size=4)
+"""
+dataloader = get_dataloader("test", batch_size=4)
 for batch in dataloader:
     print(batch)
     break
+"""
