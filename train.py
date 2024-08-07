@@ -16,7 +16,7 @@ def train_model(model: PerformancepredictionModel, train_dataloader: DataLoader,
     Trains model and prints accuracy on dev data after training
 
     Arguments:
-        model (HateSpeechClassificationModel): the model to train
+        model (PerformancepredictionModel): the model to train
         train_dataloader (DataLoader): a pytorch dataloader containing the training data
         dev_dataloader (DataLoader): a pytorch dataloader containing the development data
         epochs (int): the number of epochs to train for (full iterations through the dataset)
