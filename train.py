@@ -91,7 +91,7 @@ def train_model(model: PerformancepredictionModel, train_dataloader: DataLoader,
 def main():
     parser = argparse.ArgumentParser(
         description="Train a performance prediction model.")
-    parser.add_argument("--epochs", default=7, type=int,
+    parser.add_argument("--epochs", default=10, type=int,
                         help="help= Number of training epochs")
     parser.add_argument("--learning_rate", default=1e-2, type=float,
                         help="The learning rate")
