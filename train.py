@@ -33,6 +33,9 @@ def train_model(model: PerformancepredictionModel, train_dataloader: DataLoader,
     optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
 
     # early stopping variable configuration
+    best_val_loss = float("inf")
+    patience_counter = 0
+    patience = 10
 
     # Set model to train mode
 
@@ -52,6 +55,31 @@ def train_model(model: PerformancepredictionModel, train_dataloader: DataLoader,
             loss.backward()
             # Update weights
             optimizer.step()
+
+        model.eval()
+        val_loss = 0.0
+        with torch.no_grad():
+            for batch in dev_dataloader:
+                input_ids = batch['input_ids'].to(device)
+                attention_mask = batch['attention_mask'].to(device)
+                labels = batch['labels'].to(device)
+                logits = model(input_ids, attention_mask).squeeze()
+                loss = criterion(logits, labels.float())
+                val_loss += loss.item()
+
+        val_loss /= len(dev_dataloader)
+        print(f"Epoch {epoch+1}, Validation Loss: {val_loss:.4f}")
+
+        if val_loss < best_val_loss:
+            best_val_loss = val_loss
+            patience_counter = 0
+            # Optionally save the best model state
+            torch.save(model.state_dict(), 'best_model.pth')
+        else:
+            patience_counter += 1
+            if patience_counter >= patience:
+                print("Early stopping triggered")
+                break
 
             # Compute training accuracy
 
